@@ -19,58 +19,23 @@
           </svg>
         </a>
       </div>
+      <div class="menu">
+        <router-link to="/" class="menu_link link">Go to Home</router-link>
+        <router-link to="/reserch" class="menu_link link">Go to Reserch</router-link>
+        <router-link to="/reserch" class="menu_link link">Go to Reserch</router-link>
+        <router-link to="/reserch" class="menu_link link">Go to Reserch</router-link>
+        <router-link to="/reserch" class="menu_link link">Go to Reserch</router-link>
+      </div>
       <div class="login">
         <button class="logInButton">
           <span class="spanLogin">
             <img src="./assets/login.png" alt="" id="log">
-              <!-- <svg class="MuiSvgIcon-root" focusable="false" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5c-1.11 0-2 .9-2 2v4h2V5h14v14H5v-4H3v4c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"></path>
-              </svg> -->
               Войти
           </span>
         </button>
       </div>
     </div>
-    <div class="popular"></div>
-    <div class="search">
-      <div class="params">
-        <h1>Фильтр</h1>
-        <div class="from">
-          <p>Отправление из</p>
-          <input type="text" placeholder="Любое" class="bigInput">
-        </div>
-        <div class="line"></div>
-        <div class="to">
-          <p>Отправление куда</p>
-          <input type="text" placeholder="Любое" class="bigInput">
-        </div>
-        <div class="line"></div>
-        <div class="from">
-          <p>Тип автобуса</p>
-          <input type="text" placeholder="Любой" class="bigInput">
-        </div>
-        <div class="line"></div>
-        <div class="from">
-          <p>Цена, $</p>
-          <div class="price">
-            <input type="text" placeholder="ОТ" class="bigInputfrom">
-            <input type="text" placeholder="до" class="bigInputto">
-          </div>
-        </div>
-        <div class="line"></div>
-        <div class="from">
-          <p>Дата</p>
-          <input type="date" placeholder="Любой" class="bigInput">
-        </div>
-        <div class="remove">
-          <img src="./assets/trash-can.png" alt="" id="trashcan">
-          Очистить фильтр
-        </div>
-      </div>
-      <div class="resaults">
-        
-      </div>
-    </div>
+  <router-view></router-view>
   </div>
 </template>
 
@@ -86,18 +51,24 @@
     -moz-osx-font-smoothing: grayscale;
     text-align: center;
     color: #2c3e50;
+    height: 100%;
+}
+html, body{
+  margin: 0px;
+  height: 100%;
+  width: 100%;
 }
 .main{
   width: 100%;
-  height: 2000px;
-  border:1px solid
+  height: 100%;
+  background-color: #F0F3F5;
 }
 .header{
   width: 100%;
-  height: 5%;
+  height: 10%;
   display: flex;
   justify-content: space-between;
-  border:1px solid;
+  /* border-bottom:1px solid; */
 }
 .logo{
   width: 30%;
@@ -106,12 +77,35 @@
   justify-content: center;
   align-items: center;
 }
+.menu{
+  height: 100%;
+  width: 50%;
+  display:flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.menu_link{
+  padding: 2% 2.5% 2% 2.5%;
+  font-size: large;
+  border-radius: 20px;
+}
+.menu_link:hover{
+  background-color:#e0e6e6;
+  transition-duration: 500ms;
+}
 .login{
   width: 20%;
   height: 100%;
   display:flex;
   justify-content: center;
   align-items: center;
+}
+#log{
+  width: 40%;
+}
+.link{
+  text-decoration: none;
+  color: black;
 }
 .spanLogin{
   display: flex;
@@ -120,81 +114,18 @@
 }
 .logInButton{
   width: 40%;
-  background-color: white;
+  background-color: #F0F3F5;
   border:none;
   border-radius: 20px;
 }
 .logInButton:hover{
-  background-color:#eaebeb;
+  background-color:#e0e6e6;
   transition-duration: 500ms;
 }
 .MuiSvgIcon-root{
   margin-right: 10%;
 }
-.search{
-  width: 100%;
-  height: 35%;
-  border: 1px solid;
-  display: flex;
-  flex-direction: row;
-}
-.params{
-  width: 20%;
-  height: 100%;
-  border: 1px solid;
-  display: flex;
-  flex-direction: column;
-  align-items:center;
-}
-.resaults{
-  height: 100%;
-  width: 85%;
-  border: 1px solid;
-}
-.popular{
-  width: 100%;
-  height: 15%;
-}
-.bigInput{
-  width: 100%;
-  height: 20%;
-}
-.from, .to{
-  width: 80%;
-  height: 15%;
-  display: flex;
-  flex-direction: column;
-  align-items:flex-start;
-}
-.line{
-  width: 80%;
-  border-top:1px solid;
-  margin: auto;
-}
-.bigInputfrom, .bigInputto{
-  width: 45%;
-  height: 35%;
-}
-.price{
-  width: 100%;
-  height: 80%;
-  display: flex;
-  justify-content: space-between;
-}
-#log{
-  width: 40%;
-}
-#trashcan{
-  width: 5%;
-  margin-right: 2%;
-}
-.remove{
-  margin-bottom: 5%;
-  width: 80%;
-  display: flex;
-  align-items:flex-start;
-}
-.remove:hover{
-  color:black;
-}
+
+
+
 </style>
