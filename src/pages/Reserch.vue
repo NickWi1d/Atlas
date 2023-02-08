@@ -4,30 +4,30 @@
         <h1>Фильтр</h1>
         <div class="from">
           <p>Отправление из</p>
-          <input type="text" placeholder="Любое" class="bigInput">
+          <input type="text" placeholder="Любое" class="bigInput" v-model="from">
         </div>
         <div class="line"></div>
         <div class="to">
           <p>Отправление куда</p>
-          <input type="text" placeholder="Любое" class="bigInput">
+          <input type="text" placeholder="Любое" class="bigInput" v-model="to">
         </div>
         <div class="line"></div>
         <div class="from">
           <p>Тип автобуса</p>
-          <input type="text" placeholder="Любой" class="bigInput">
+          <input type="text" placeholder="Любой" class="bigInput" v-model="typeBus">
         </div>
         <div class="line"></div>
         <div class="from">
           <p>Цена, $</p>
           <div class="price">
-            <input type="text" placeholder="ОТ" class="bigInputfrom">
-            <input type="text" placeholder="до" class="bigInputto">
+            <input type="text" placeholder="ОТ" class="bigInputfrom" v-model="coastFrom">
+            <input type="text" placeholder="до" class="bigInputto" v-model="coastTo">
           </div>
         </div>
         <div class="line"></div>
         <div class="from">
           <p>Дата</p>
-          <input type="date" placeholder="Любой" class="bigInput">
+          <input type="date" placeholder="Любой" class="bigInput" v-model="date">
         </div>
         <div class="remove">
           <img src="../assets/trash-can.png" alt="" id="trashcan">
@@ -35,15 +35,37 @@
         </div>
       </div>
       <div class="resaults">
-        
+        <input type="text" id="test">
+        <input type="button" value="ckick" @click="dunx">
       </div>
     </div>
 </template>
 
-<script >
-export default{
+<script setup>
+import { onMounted, ref, watchEffect, unref } from "vue";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from '../main'
+let name = 'nikita'
+let test = ''
+let from = ref('Минск'), to, typeBus, coastFrom, coastTo, date
+onMounted(() =>{
+  test = document.querySelector('#test')
+})
 
-};
+async function dunx(){
+  const docRef = doc(db, "locations", "LEL01c0X0iMCFntQltYm");
+  const docSnap = await getDoc(docRef);
+
+  if (docSnap.exists()) {
+
+    name = docSnap.data().artem
+    test.value = name
+  } else {
+    console.log("No such document!");
+  }
+}
+
+watchEffect((from) => console.log(unref(from)))
 
 </script>
 
