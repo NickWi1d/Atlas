@@ -3,6 +3,7 @@ import { createApp } from 'vue'
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 
+
 import { createRouter, createWebHistory } from 'vue-router'
 import routes from './routes'
 

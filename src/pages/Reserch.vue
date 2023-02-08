@@ -35,37 +35,58 @@
         </div>
       </div>
       <div class="resaults">
-        <input type="text" id="test">
-        <input type="button" value="ckick" @click="dunx">
+        <p id="from"></p>
+
+        
+        <input type="button" value="ckick" @click="fetch">
       </div>
     </div>
 </template>
 
 <script setup>
-import { onMounted, ref, watchEffect, unref } from "vue";
+import {onMounted, ref, watchEffect } from "vue";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from '../main'
-let name = 'nikita'
-let test = ''
-let from = ref('Минск'), to, typeBus, coastFrom, coastTo, date
-onMounted(() =>{
-  test = document.querySelector('#test')
-})
 
-async function dunx(){
-  const docRef = doc(db, "locations", "LEL01c0X0iMCFntQltYm");
+let H1from
+
+let from = ref('Минск'), to = ref('Москва'), typeBus= ref(''),coastFrom= ref(''),coastTo= ref(''),date= ref('')
+let res = {}
+
+
+onMounted(() => {
+  H1from = document.querySelector('#from')
+})
+async function fetch(){
+  const docRef = doc(db, "bus's trips", "1");
   const docSnap = await getDoc(docRef);
 
   if (docSnap.exists()) {
-
-    name = docSnap.data().artem
-    test.value = name
+    H1from.innerHTML = `№: ${docSnap.data().trip}
+    Откуда: ${docSnap.data().from}
+    Куда: ${docSnap.data().to}
+    Тип автобуса: ${docSnap.data().type}
+    Цена: ${docSnap.data().price}
+    Дата: ${new Date(docSnap.data().date.toDate()).getDate()}.${new Date(docSnap.data().date.toDate()).getMonth()}.${new Date(docSnap.data().date.toDate()).getFullYear()} 
+    Водитель: ${docSnap.data().driver} 
+    `
   } else {
     console.log("No such document!");
   }
 }
-
-watchEffect((from) => console.log(unref(from)))
+function search(){
+  res.from = from.value
+  res.to = to.value
+  res.typeBus = typeBus.value
+  res.coastFrom = coastFrom.value
+  res.coastTo = coastTo.value
+  res.date = date.value
+  console.log(res)
+  fetch()
+}
+watchEffect(
+  () => {search()}
+)
 
 </script>
 
