@@ -22,17 +22,23 @@
       <div class="menu">
         <router-link to="/" class="menu_link link">Go to Home</router-link>
         <router-link to="/reserch" class="menu_link link">Go to Reserch</router-link>
-        <router-link to="/reserch" class="menu_link link">Go to Reserch</router-link>
-        <router-link to="/reserch" class="menu_link link">Go to Reserch</router-link>
+        <router-link to="/Login" class="menu_link link">Go to Login</router-link>
+        <router-link to="/Signup" class="menu_link link">Go to Register</router-link>
         <router-link to="/reserch" class="menu_link link">Go to Reserch</router-link>
       </div>
       <div class="login">
-        <button class="logInButton">
+        <!-- <button class="logInButton">
           <span class="spanLogin">
             <img src="./assets/login.png" alt="" id="log">
               Войти
           </span>
-        </button>
+        </button> -->
+        <router-link to="/Login" class="logInButton link">
+          <span class="spanLogin">
+            <img src="./assets/login.png" alt="" id="log">
+              Войти
+          </span>
+        </router-link>
       </div>
     </div>
   <router-view></router-view>

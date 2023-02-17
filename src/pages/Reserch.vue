@@ -14,7 +14,7 @@
         <div class="line"></div>
         <div class="from">
           <p>Тип автобуса</p>
-          <input type="text" placeholder="Любой" class="bigInput" v-model="typeBus">
+          <input type="text" placeholder="Любой" class="bigInput" v-model="type">
         </div>
         <div class="line"></div>
         <div class="from">
@@ -41,6 +41,7 @@
 </template>
 
 <script setup>
+
 import {onMounted, ref, watchEffect } from "vue";
 // import { doc, getDoc } from "firebase/firestore";
 import { db } from '../main'
@@ -51,37 +52,20 @@ let resaults
 let currentDate = new Date()
 let currentDay, currentMounth
 String(currentDate.getDate()).length > 1 ? currentDay = currentDate.getDate() : currentDay = `0${currentDate.getDate()}`
-String(currentDate.getMonth()).length > 1 ? currentMounth = currentDate.getMonth() : currentMounth =  `0${currentDate.getMonth()}`
-let from = ref('Минск'), to = ref('Москва'), typeBus= ref('Большой'), coastFrom= ref('0'), coastTo= ref('9999'), date= ref(`${currentDate.getFullYear()}-${currentMounth}-${currentDay}`)
+String(currentDate.getMonth()).length > 1 ? currentMounth = currentDate.getMonth() : currentMounth =  `0${currentDate.getMonth()+1}`
+let from = ref(), to = ref(), type= ref(), coastFrom= ref(), coastTo= ref(), date= ref(`${currentDate.getFullYear()}-${currentMounth}-${currentDay}`)
 let res = {}
 
 
 onMounted(() => {
   resaults = document.querySelector('.resaults')
 })
-// async function fetch(){
-//   const docRef = doc(db, "bus's trips", "1");
-//   const docSnap = await getDoc(docRef);
-
-//   if (docSnap.exists()) {
-//     H1from.innerHTML = `№: ${docSnap.data().trip}
-//     Откуда: ${docSnap.data().from}
-//     Куда: ${docSnap.data().to}
-//     Тип автобуса: ${docSnap.data().type}
-//     Цена: ${docSnap.data().price}
-//     Дата: ${new Date(docSnap.data().date.toDate()).getDate()}.${new Date(docSnap.data().date.toDate()).getMonth()}.${new Date(docSnap.data().date.toDate()).getFullYear()} 
-//     Водитель: ${docSnap.data().driver} 
-//     `
-//   } else {
-//     console.log("No such document!");
-//   }
-// }
 
 function removeFiltr(){
   deleteItems()
   from.value = ''
   to.value = ''
-  typeBus.value = ''
+  type.value = ''
   coastTo.value = ''
   coastFrom.value = ''
   date.value = ''
@@ -93,11 +77,20 @@ function deleteItems() {
     deleteElement[i].remove();
   }
 }
+
 async function filtr(){
-  const q = query(collection(db, "bus's trips"), where("from", "==", `${res.from}`), where("to", "==", `${res.to}`), where("type", "==", `${res.typeBus}`));
+  const queryConstraints = []
+  for(let prop in res){
+    if(res[prop] != undefined && prop !='coastFrom' && prop !='coastTo'){queryConstraints.push(where(`${prop}`, "==", `${res[prop]}`))}
+    else if(res[prop] != undefined && prop == 'coastFrom'){queryConstraints.push(where(`price`, ">=", `${Number(res[prop])}`))}
+    else if(res[prop] != undefined && prop == 'coastTo'){queryConstraints.push(where(`price`, "<=", `${Number(res[prop])}`))}
+  }
+  console.log(queryConstraints)
+  const q = query(collection(db, "bus's trips"), ...queryConstraints);
   const querySnapshot = await getDocs(q);
   deleteItems()
   querySnapshot.forEach((doc) => {
+    console.log(doc.data())
     let div =  document.createElement('div')
     div.className = 'resOfSearch'
     
@@ -107,6 +100,7 @@ async function filtr(){
     from.innerHTML = `${doc.data().from}`
     fromVrap.append(from)
     div.append(fromVrap)
+    
 
     let dashVrap =  document.createElement('div')
     dashVrap.className = 'dashVrap'
@@ -155,17 +149,18 @@ async function filtr(){
     resaults.append(div)
   });
 }
+
 function search(){
-  res.from = from.value
-  res.to = to.value
-  res.typeBus = typeBus.value
-  res.coastFrom = coastFrom.value
-  res.coastTo = coastTo.value
-  res.date = date.value
+  from.value == '' ? res.from = undefined : res.from = from.value
+  to.value == '' ? res.to = undefined : res.to = to.value
+  type.value == '' ? res.type = undefined : res.type = type.value
+  coastFrom.value == '' ? res.coastFrom = undefined : res.coastFrom = coastFrom.value
+  coastTo.value == '' ? res.coastTo = undefined : res.coastTo = coastTo.value
+  date.value == '' ? res.date = undefined : res.date = date.value
   console.log(res)
-  console.log(`${currentDate.getFullYear()}-${currentMounth}-${currentDay}`)
   filtr()
 }
+
 watchEffect(
   () => {search()}
 )
