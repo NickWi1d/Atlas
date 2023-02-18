@@ -45,9 +45,12 @@
 import {onMounted, ref, watchEffect } from "vue";
 // import { doc, getDoc } from "firebase/firestore";
 import { db } from '../main'
-
-
+import { auth } from '../main'
+import { doc, setDoc} from "firebase/firestore"; 
 import { collection, query, where, getDocs } from "firebase/firestore";
+
+
+
 let resaults
 let currentDate = new Date()
 let currentDay, currentMounth
@@ -61,6 +64,9 @@ onMounted(() => {
   resaults = document.querySelector('.resaults')
 })
 
+
+
+
 function removeFiltr(){
   deleteItems()
   from.value = ''
@@ -70,14 +76,17 @@ function removeFiltr(){
   coastFrom.value = ''
   date.value = ''
 }
-
 function deleteItems() {
   let deleteElement = resaults.querySelectorAll('div');
   for (let i = 0; i < deleteElement.length; i++) {
     deleteElement[i].remove();
   }
 }
-
+async function writeUserData(userId, tripID) {
+  console.log(`trypID: ${tripID}`)
+  await setDoc(doc(db, "Users", userId), {
+  tripID: tripID,
+})}
 async function filtr(){
   const queryConstraints = []
   for(let prop in res){
@@ -90,7 +99,6 @@ async function filtr(){
   const querySnapshot = await getDocs(q);
   deleteItems()
   querySnapshot.forEach((doc) => {
-    console.log(doc.data())
     let div =  document.createElement('div')
     div.className = 'resOfSearch'
     
@@ -142,14 +150,19 @@ async function filtr(){
     let order = document.createElement('input')
     order.className = 'order'
     order.type = 'button'
-    order.value = 'Заказать'
+    order.value = 'Добавить'
+    order.onclick = function(){
+      const user = auth.currentUser;
+      console.log(user.uid)
+      console.log(doc.id)
+      writeUserData(user.uid, doc.id)
+    }
     orderVrap.append(order)
     div.append(orderVrap)
 
     resaults.append(div)
   });
 }
-
 function search(){
   from.value == '' ? res.from = undefined : res.from = from.value
   to.value == '' ? res.to = undefined : res.to = to.value
@@ -160,6 +173,9 @@ function search(){
   console.log(res)
   filtr()
 }
+
+
+
 
 watchEffect(
   () => {search()}
