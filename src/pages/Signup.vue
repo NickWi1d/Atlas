@@ -10,6 +10,7 @@
 
     <button class="w-max mt-4 px-4 py-2 text-center rounded-full bg-blue-500 text-white">Зарегистрироваться</button>
     <div v-if="error">{{ error }}</div>
+    <router-link to="/Login" class="singleIn">Уже зарегестрированы? Войти</router-link>
   </form>
 </template>
 <script setup>
@@ -21,7 +22,7 @@ import { db } from '../main'
 import { auth } from '../main'
 
 async function writeUserData(userId, email) {
-  await setDoc(doc(db, "Users", userId), {
+  await setDoc(doc(db, `User: ${userId}`, "InfoAboutUser"), {
   email: email,
 })}
 const email = ref('')
@@ -37,7 +38,7 @@ const handleSubmit = async () => {
       email: email.value,
       password: password.value
     })
-    router.push('/Reserch')
+    router.push('/PersonalAccount')
     const user = auth.currentUser;
     writeUserData(user.uid, user.email)
   }

@@ -1,17 +1,18 @@
 <template>
-  <form @submit.prevent="handleSubmit" class="LogInForm">
-    <h3 class="headLabel">Войти</h3>
+    <!-- <form v-if="user == null" @submit.prevent="handleSubmit" class="LogInForm"> -->
+    <form  @submit.prevent="handleSubmit" class="LogInForm">
+      <h3 class="headLabel">Войти</h3>
 
-    <label for="email" class="emailLabel">Email:</label>
-    <input class="emailInput" type="email" name="email" v-model="email" required>
+      <label for="email" class="emailLabel">Email:</label>
+      <input class="emailInput" type="email" name="email" v-model="email" required>
 
-    <label for="email" class="passLabel">Password:</label>
-    <input class="passInput" type="password" name="password" v-model="password" required>
+      <label for="email" class="passLabel">Password:</label>
+      <input class="passInput" type="password" name="password" v-model="password" required>
 
-    <button class="w-max mt-4 px-4 py-2 text-center rounded-full bg-blue-500 text-white">Войти</button>
-    <div v-if="error">{{ error }}</div>
-    <router-link to="/signup" class="singleIn">Не зарегестированы? Зарегестрироваться</router-link>
-  </form>
+      <button class="w-max mt-4 px-4 py-2 text-center rounded-full bg-blue-500 text-white">Войти</button>
+      <div v-if="error">{{ error }}</div>
+      <router-link to="/signup" class="singleIn">Не зарегестированы? Зарегестрироваться</router-link>
+    </form>
 </template>
 
 
@@ -19,7 +20,6 @@
 import { ref } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
-
 
 const email = ref('')
 const password = ref('')
@@ -34,7 +34,7 @@ const handleSubmit = async () => {
       email: email.value,
       password: password.value
     })
-    router.push('/Reserch')
+    router.push('/PersonalAccount')
   }
   catch (err) {
     error.value = err.message
@@ -74,4 +74,8 @@ const handleSubmit = async () => {
 
 .headLabel {
   margin-bottom: 2%;
-}</style>
+}
+.personalAccount{
+  height: 90%;
+}
+</style>

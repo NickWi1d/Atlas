@@ -22,23 +22,23 @@
       <div class="menu">
         <router-link to="/" class="menu_link link">Go to Home</router-link>
         <router-link to="/reserch" class="menu_link link">Go to Reserch</router-link>
-        <router-link to="/Login" class="menu_link link">Go to Login</router-link>
-        <router-link to="/Signup" class="menu_link link">Go to Register</router-link>
         <router-link to="/reserch" class="menu_link link">Go to Reserch</router-link>
+        <router-link to="/reserch" class="menu_link link">Go to Reserch</router-link>
+        <router-link to="/PersonalAccount" class="menu_link link">Go to PersonalAccount</router-link>
       </div>
       <div class="login">
-        <!-- <button class="logInButton">
+        <router-link to="/Navbar" class="logInButton link">
           <span class="spanLogin">
             <img src="./assets/login.png" alt="" id="log">
-              Войти
-          </span>
-        </button> -->
-        <router-link to="/Login" class="logInButton link">
-          <span class="spanLogin">
-            <img src="./assets/login.png" alt="" id="log">
-              Войти
+              Личный кабинет
           </span>
         </router-link>
+        <!-- <router-link  to="/PersonalAccount" class="logInButton link">
+          <span class="spanLogin">
+            <img src="./assets/login.png" alt="" id="log">
+              Личный кабинет
+          </span>
+        </router-link> -->
       </div>
     </div>
   <router-view></router-view>
@@ -46,7 +46,6 @@
 </template>
 
 <script setup>
-
 
 </script>
 
@@ -107,7 +106,8 @@ html, body{
   align-items: center;
 }
 #log{
-  width: 40%;
+  width: 20%;
+  padding-right: 5%;
 }
 .link{
   text-decoration: none;
@@ -119,7 +119,7 @@ html, body{
   font-size: 20px
 }
 .logInButton{
-  width: 40%;
+  width: 70%;
   background-color: #F0F3F5;
   border:none;
   border-radius: 20px;
@@ -131,7 +131,6 @@ html, body{
 .MuiSvgIcon-root{
   margin-right: 10%;
 }
-
 
 
 </style>

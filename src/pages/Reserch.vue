@@ -82,11 +82,21 @@ function deleteItems() {
     deleteElement[i].remove();
   }
 }
-async function writeUserData(userId, tripID) {
-  console.log(`trypID: ${tripID}`)
-  await setDoc(doc(db, "Users", userId), {
-  tripID: tripID,
-})}
+
+async function AddInfoIntoUserData(userId, documentId, date, driver, from, price, time, to, trip, type) {
+  await setDoc(doc(db, `User: ${userId}`, documentId), {
+    date: date,
+    driver: driver, 
+    from: from, 
+    price: price, 
+    time: time, 
+    to: to, 
+    trip: trip, 
+    type: type
+  });
+}
+
+
 async function filtr(){
   const queryConstraints = []
   for(let prop in res){
@@ -153,9 +163,7 @@ async function filtr(){
     order.value = 'Добавить'
     order.onclick = function(){
       const user = auth.currentUser;
-      console.log(user.uid)
-      console.log(doc.id)
-      writeUserData(user.uid, doc.id)
+      AddInfoIntoUserData(user.uid, doc.id, doc.data().date, doc.data().driver, doc.data().from, doc.data().price, doc.data().time, doc.data().to, doc.data().trip, doc.data().type)
     }
     orderVrap.append(order)
     div.append(orderVrap)
@@ -193,7 +201,6 @@ watchEffect(
 .params{
   width: 20%;
   height: 100%;
-  /* border: 1px solid; */
   display: flex;
   flex-direction: column;
   align-items:center;
@@ -201,7 +208,6 @@ watchEffect(
 .resaults{
   height: 100%;
   width: 85%;
-  border-left: 1px solid;
 }
 .bigInput{
   width: 100%;
@@ -213,6 +219,7 @@ watchEffect(
   display: flex;
   flex-direction: column;
   align-items:flex-start;
+  justify-content: space-evenly;
 }
 .line{
   width: 80%;
@@ -228,6 +235,7 @@ watchEffect(
   height: 80%;
   display: flex;
   justify-content: space-between;
+  align-items:center;
 }
 
 #trashcan{
