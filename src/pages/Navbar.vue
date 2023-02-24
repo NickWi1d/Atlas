@@ -1,5 +1,5 @@
 <template>
-  <div class="main">
+  <div class="perAcc">
       <Login v-if="auth.currentUser == null"/>
       <PersonalAccount v-else/>
   </div>
@@ -13,7 +13,7 @@ import PersonalAccount from '../pages/PersonalAccount.vue'
 </script>
 
 <style>
-.main{
-  height: 95%;
+.perAcc{
+  height: 90%;
 }
 </style>

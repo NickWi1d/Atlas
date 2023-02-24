@@ -35,7 +35,6 @@
         </div>
       </div>
       <div class="resaults">
-        <!-- <p id="from"></p> -->
       </div>
     </div>
 </template>

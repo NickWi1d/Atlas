@@ -21,16 +21,13 @@
       </div>
       <div class="menu">
         <router-link to="/" class="menu_link link">Go to Home</router-link>
-        <router-link to="/reserch" class="menu_link link">Go to Reserch</router-link>
-        <router-link to="/reserch" class="menu_link link">Go to Reserch</router-link>
-        <router-link to="/reserch" class="menu_link link">Go to Reserch</router-link>
-        <router-link to="/PersonalAccount" class="menu_link link">Go to PersonalAccount</router-link>
+        <router-link to="/reserch" class="menu_link link">Go to Reserch</router-link> 
       </div>
       <div class="login">
         <router-link to="/Navbar" class="logInButton link">
           <span class="spanLogin">
             <img src="./assets/login.png" alt="" id="log">
-              Личный кабинет
+              Профиль
           </span>
         </router-link>
         <!-- <router-link  to="/PersonalAccount" class="logInButton link">
@@ -86,7 +83,7 @@ html, body{
   height: 100%;
   width: 50%;
   display:flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
 }
 .menu_link{
@@ -106,7 +103,7 @@ html, body{
   align-items: center;
 }
 #log{
-  width: 20%;
+  width: 30%;
   padding-right: 5%;
 }
 .link{
@@ -119,7 +116,7 @@ html, body{
   font-size: 20px
 }
 .logInButton{
-  width: 70%;
+  width: 50%;
   background-color: #F0F3F5;
   border:none;
   border-radius: 20px;
