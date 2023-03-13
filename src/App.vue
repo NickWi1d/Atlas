@@ -20,8 +20,8 @@
         </a>
       </div>
       <div class="menu">
-        <router-link to="/" class="menu_link link">Go to Home</router-link>
-        <router-link to="/reserch" class="menu_link link">Go to Reserch</router-link> 
+        <router-link to="/" class="menu_link link">Домашняя страница</router-link>
+        <router-link to="/reserch" class="menu_link link">Поиск поездок</router-link> 
       </div>
       <div class="login">
         <router-link to="/Navbar" class="logInButton link">
@@ -30,12 +30,6 @@
               Профиль
           </span>
         </router-link>
-        <!-- <router-link  to="/PersonalAccount" class="logInButton link">
-          <span class="spanLogin">
-            <img src="./assets/login.png" alt="" id="log">
-              Личный кабинет
-          </span>
-        </router-link> -->
       </div>
     </div>
   <router-view></router-view>

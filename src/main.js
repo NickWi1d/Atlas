@@ -2,7 +2,7 @@ import { createApp } from 'vue'
 
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
-import { getAuth } from 'firebase/auth'
+import { getAuth} from 'firebase/auth'
 
 import { createRouter, createWebHistory } from 'vue-router'
 import routes from './routes'
@@ -27,5 +27,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 export const auth = getAuth()
+
 
 createApp(App).use(router).use(store).mount('#app')

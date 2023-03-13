@@ -8,21 +8,22 @@
     </div>
     <div class="content">
       <div id="PersonalInfo" class="tabcontent">
-        <form action="action_page.php" @submit.prevent="saveChenges(user.uid, user.email, Fname, Lname, PhoneNumber)">
+        <form action="action_page.php" @submit.prevent="saveChenges(user.uid, user.email, FullInfoAboutUser.FirstName, FullInfoAboutUser.LastName, FullInfoAboutUser.PhoneNumber)">
 
           <label for="fname">Email</label>
-          <input type="text" id="fname" name="firstname" placeholder="Your email.." :value="user.email" readonly>
+          <input type="text" id="fname" name="firstname" placeholder="Your email.." :value="user.email" readonly
+            class="personalInfo">
 
-          <label for="fname">First Name</label>
-          <input type="text" id="fname" name="lastname" placeholder="Your first name.." v-model="Fname">
+          <label for="fname">Имя</label>
+          <input type="text" id="fname" name="lastname" placeholder="Your first name.." v-model="FullInfoAboutUser.FirstName" class="personalInfo">
 
-          <label for="lname">Last Name</label>
-          <input type="text" id="lname" name="lastname" placeholder="Your last name.." v-model="Lname">
+          <label for="lname">Фамилия</label>
+          <input type="text" id="lname" name="lastname" placeholder="Your last name.."  v-model="FullInfoAboutUser.LastName" class="personalInfo">
 
-          <label for="PhoneNumber">Phone number</label>
-          <input type="text" id="lname" name="PhoneNumber" placeholder="Your phone number.." v-model="PhoneNumber">
+          <label for="PhoneNumber">Номер телефона</label>
+          <input type="text" id="lname" name="PhoneNumber" placeholder="Your phone number.."  v-model="FullInfoAboutUser.PhoneNumber" class="personalInfo">
 
-          <input type="submit" value="Save">
+          <input type="submit" value="Сохранить">
 
         </form>
       </div>
@@ -32,10 +33,12 @@
       <div id="settings" class="tabcontent">
         <div class="wrpDelAcc">
           <p>Вы можете удалить аккаунт без вожможности восстановления, все данные будут утеряны</p>
-          <input type="button" value="Удалить аккаунт" class="delAcc" @click="deleteUser">
+          <input type="button" value="Удалить аккаунт" class="delAcc" @click="deleteUser(ids)">
         </div>
       </div>
     </div>
+    <div id="deleteTrip">Поездка успешно удалена</div>
+    <div id="saveChenges">Успешно сохранено</div>
   </div>
 </template>
 
@@ -46,47 +49,78 @@ import { useRouter } from 'vue-router'
 import { auth, db } from '../main'
 import { collection, query, getDocs, doc, deleteDoc, setDoc } from 'firebase/firestore';
 
-let Fname = ref(), Lname = ref(), PhoneNumber = ref()
-let myTrips
+let myTrips, ids = []
+let FullInfoAboutUser = ref({})
+
 const user = auth.currentUser;
+const error = ref(null)
+const store = useStore()
+const router = useRouter()
 
-async function deleteTripFromPersonalAccount(collection, document) {
-  await deleteDoc(doc(db, `User: ${collection.uid}`, document));
-}
-
-async function deleteCollection(user){
-  const allDocs = query(collection(db, `User: ${user.uid}`));
-  const allDocsSnapshot = await getDocs(allDocs);
-  allDocsSnapshot.forEach((docum) => {
-    del(docum)
-  })
-  async function del(d){
-    await deleteDoc(doc(db, `User: ${user.uid}`, d.id));
-  }
-}
-
-
-onMounted(() => {
+onMounted(async () => {
   document.getElementById("defaultOpen").click()
   myTrips = document.querySelector('#myTrips')
   filtr()
-})
-const error = ref(null)
+  await getFullInfoAboutUser()
+  console.log(FullInfoAboutUser)
 
-const store = useStore()
-const router = useRouter()
+})
+// Не работает((
+  async function getFullInfoAboutUser(){
+  const q = query(collection(db, `User: ${user.uid}`));
+  const querySnapshot = await getDocs(q);
+  querySnapshot.forEach((doc) => {
+    if (doc.id == 'InfoAboutUser') {
+      FullInfoAboutUser.value.FirstName = doc.data().FirstName
+      FullInfoAboutUser.value.LastName = doc.data().LastName
+      FullInfoAboutUser.value.PhoneNumber = doc.data().PhoneNumber
+    }
+
+  })
+  console.log(FullInfoAboutUser)
+}
+
+async function deleteTripFromPersonalAccount(collection, document) {
+  await deleteDoc(doc(db, `User: ${collection}`, document));
+}
+
+
+
 
 async function saveChenges(userId, email, Fname, Lname, PhoneNumber) {
   await setDoc(doc(db, `User: ${userId}`, "InfoAboutUser"), {
     "email": email,
-    "First name": Fname,
-    "Last name": Lname,
-    "Phone number": PhoneNumber,
+    "FirstName": Fname,
+    "LastName": Lname,
+    "PhoneNumber": PhoneNumber,
   })
-}
+  // Get the snackbar DIV
+  var x = document.getElementById("saveChenges");
 
-function deleteUser() {
-  deleteCollection(user.uid)
+  // Add the "show" class to DIV
+  x.className = "show";
+
+  // After 3 seconds, remove the show class from DIV
+  setTimeout(function () { x.className = x.className.replace("show", ""); }, 3000);
+}
+async function getCollection() {
+  ids = []
+  const querySnapshot = await getDocs(collection(db, `User: ${user.uid}`));
+  querySnapshot.forEach((doc) => {
+    // doc.data() is never undefined for query doc snapshots
+    console.log(doc.id, " => ", doc.data());
+    ids.push(doc.id)
+  })
+  console.log(ids)
+}
+async function delDosFromCollection(arr) {
+  for (let val in arr) {
+    await deleteDoc(doc(db, `User: ${user.uid}`, arr[val]));
+  }
+}
+async function deleteUser() {
+  await getCollection()
+  await delDosFromCollection(ids)
   user.delete().then(function () {
     console.log('пользователь удален')
   }).catch(function (error) {
@@ -95,6 +129,119 @@ function deleteUser() {
   handleSubmit()
 
 }
+async function filtr() {
+  const q = query(collection(db, `User: ${user.uid}`));
+  const querySnapshot = await getDocs(q);
+  // deleteItems()
+  querySnapshot.forEach((doc) => {
+    if (doc.id != 'InfoAboutUser') {
+      let div = document.createElement('div')
+      div.className = 'resOfSearchPA'
+
+      let wrapForDiv = document.createElement('div')
+      wrapForDiv.className = 'wrapForDivPA'
+
+      let fromVrap = document.createElement('div')
+      fromVrap.className = 'fromVrapPA'
+      let from = document.createElement('h1')
+      from.innerHTML = `${doc.data().from}`
+      fromVrap.append(from)
+      wrapForDiv.append(fromVrap)
+
+
+      let dashVrap = document.createElement('div')
+      dashVrap.className = 'dashVrapPA'
+      let dash = document.createElement('h1')
+      dash.innerHTML = `-`
+      dashVrap.append(dash)
+      wrapForDiv.append(dashVrap)
+
+      let toVrap = document.createElement('div')
+      toVrap.className = 'toVrapPA'
+      let to = document.createElement('h1')
+      to.innerHTML = doc.data().to
+      toVrap.append(to)
+      wrapForDiv.append(toVrap)
+
+      let timeVrap = document.createElement('div')
+      timeVrap.className = 'timeVrapPA'
+      let time = document.createElement('h1')
+      time.innerHTML = doc.data().time
+      timeVrap.append(time)
+      wrapForDiv.append(timeVrap)
+
+      let dateVrap = document.createElement('div')
+      dateVrap.className = 'dateVrapPA'
+      let date = document.createElement('h1')
+      date.innerHTML = doc.data().date
+      dateVrap.append(date)
+      wrapForDiv.append(dateVrap)
+
+      let priceVrap = document.createElement('div')
+      priceVrap.className = 'priceVrapPA'
+      let price = document.createElement('h1')
+      price.innerHTML = `${doc.data().price}$`
+      priceVrap.append(price)
+      wrapForDiv.append(priceVrap)
+
+      let orderVrap = document.createElement('div')
+      orderVrap.className = 'orderVrapPA'
+      let order = document.createElement('input')
+      order.className = 'order'
+      order.type = 'button'
+      order.value = 'Удалить'
+      order.onclick = function () {
+        div.remove()
+        deleteTripFromPersonalAccount(user.uid, doc.id)
+        // Get the snackbar DIV
+        var x = document.getElementById("deleteTrip");
+
+        // Add the "show" class to DIV
+        x.className = "show";
+
+        // After 3 seconds, remove the show class from DIV
+        setTimeout(function () { x.className = x.className.replace("show", ""); }, 3000);
+      }
+      orderVrap.append(order)
+      wrapForDiv.append(orderVrap)
+
+      div.append(wrapForDiv)
+
+      div.onclick = function () {
+       if(div.querySelector('.aditionInfoPA') == null){
+        wrapForDiv.style.height = '50%'
+        div.style.height = "200px"
+
+        let aditionInfo = document.createElement('div')
+        aditionInfo.className = 'aditionInfoPA'
+
+        let Bus = document.createElement('div')
+        Bus.className = 'busVrapPA'
+        let typeOfBus = document.createElement('h1')
+        typeOfBus.innerHTML = `Тип автобуса: ${doc.data().type}`
+        Bus.append(typeOfBus)
+        aditionInfo.append(Bus)
+
+
+        let driverVrap = document.createElement('div')
+        driverVrap.className = 'driverVrapPA'
+        let driver = document.createElement('h1')
+        driver.innerHTML = `Водитель: ${doc.data().driver}`
+        driverVrap.append(driver)
+        aditionInfo.append(driverVrap)
+
+        div.append(aditionInfo)
+       }else{
+        wrapForDiv.style.height = '100%'
+        div.style.height = "100px"
+        div.querySelector('.aditionInfoPA').remove()
+       }
+      }
+      myTrips.append(div)
+    }
+  });
+}
+
 
 const handleSubmit = async () => {
   try {
@@ -106,9 +253,6 @@ const handleSubmit = async () => {
   }
 }
 
-
-
-
 function openPage(pageName) {
   let tabcontent = document.getElementsByClassName("tabcontent");
   for (let i = 0; i < tabcontent.length; i++) {
@@ -117,86 +261,17 @@ function openPage(pageName) {
   document.getElementById(pageName).style.display = "";
 }
 
-async function filtr() {
-  const q = query(collection(db, `User: ${user.uid}`));
-  const querySnapshot = await getDocs(q);
-  // deleteItems()
-  querySnapshot.forEach((doc) => {
-    if (doc.id != 'InfoAboutUser') {
-      let div = document.createElement('div')
-      div.className = 'resOfSearch'
-
-      let fromVrap = document.createElement('div')
-      fromVrap.className = 'fromVrap'
-      let from = document.createElement('h1')
-      from.innerHTML = `${doc.data().from}`
-      fromVrap.append(from)
-      div.append(fromVrap)
-
-
-      let dashVrap = document.createElement('div')
-      dashVrap.className = 'dashVrap'
-      let dash = document.createElement('h1')
-      dash.innerHTML = `-`
-      dashVrap.append(dash)
-      div.append(dashVrap)
-
-      let toVrap = document.createElement('div')
-      toVrap.className = 'toVrap'
-      let to = document.createElement('h1')
-      to.innerHTML = doc.data().to
-      toVrap.append(to)
-      div.append(toVrap)
-
-      let timeVrap = document.createElement('div')
-      timeVrap.className = 'timeVrap'
-      let time = document.createElement('h1')
-      time.innerHTML = doc.data().time
-      timeVrap.append(time)
-      div.append(timeVrap)
-
-      let dateVrap = document.createElement('div')
-      dateVrap.className = 'dateVrap'
-      let date = document.createElement('h1')
-      date.innerHTML = doc.data().date
-      dateVrap.append(date)
-      div.append(dateVrap)
-
-      let priceVrap = document.createElement('div')
-      priceVrap.className = 'priceVrap'
-      let price = document.createElement('h1')
-      price.innerHTML = `${doc.data().price}$`
-      priceVrap.append(price)
-      div.append(priceVrap)
-
-      let orderVrap = document.createElement('div')
-      orderVrap.className = 'orderVrap'
-      let order = document.createElement('input')
-      order.className = 'order'
-      order.type = 'button'
-      order.value = 'Удалить'
-      order.onclick = function () {
-        div.remove()
-        deleteTripFromPersonalAccount(user.uid, doc.id)
-      }
-      orderVrap.append(order)
-      div.append(orderVrap)
-
-      myTrips.append(div)
-    }
-  });
-}
-
 </script>
 
 <style>
-body,
-html {
-  height: 100%;
+
+* {
   margin: 0;
 }
 
-* {
+body,
+html {
+  height: 100%;
   margin: 0;
 }
 
@@ -280,22 +355,26 @@ html {
   font-size: large;
 }
 
-.fromVrap,
-.toVrap,
-.dateVrap {
+.fromVrapPA,
+.toVrapPA,
+.dateVrapPA {
   width: 18%;
 }
 
-.dashVrap {
+.busVrapPA, .driverVrapPA{
+  width: 50%;
+  margin-left: 3%;
+}
+.dashVrapPA {
   width: 2%;
 }
 
-.timeVrap,
-.priceVrap {
+.timeVrapPA,
+.priceVrapPA {
   width: 15%;
 }
 
-.orderVrap {
+.orderVrapPA {
   height: 80%;
   width: 16%;
   display: flex;
@@ -303,38 +382,45 @@ html {
   align-items: center;
 }
 
-.resOfSearch {
+.resOfSearchPA {
   width: 90%;
   height: 100px;
   display: flex;
+  flex-direction: column;
+  align-items: flex-start;
   justify-content: space-around;
-  align-items: center;
   margin-bottom: 3%;
   background: #fff;
   box-shadow: 0px 2px 4px rgb(8 78 104 / 12%), 0px 0px 2px rgb(8 78 104 / 18%);
   border-radius: 3px;
 }
 
+.wrapForDivPA {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.aditionInfoPA{
+  display: flex;
+  justify-content: space-around;
+  width: 70%;
+  height: 50%;
+}
 
 input[type=text],
 select,
 textarea {
   width: 100%;
-  /* Full width */
   padding: 12px;
-  /* Some padding */
   border: 1px solid #ccc;
-  /* Gray border */
   border-radius: 4px;
-  /* Rounded borders */
   box-sizing: border-box;
-  /* Make sure that padding and width stays in place */
   margin-top: 6px;
-  /* Add a top margin */
   margin-bottom: 16px;
-  /* Bottom margin */
   resize: vertical
-    /* Allow the user to vertically resize the textarea (not horizontally) */
 }
 
 /* Style the submit button with a specific background color etc */
@@ -391,4 +477,81 @@ label {
 
 .delAcc:hover {
   text-decoration: underline;
-}</style>
+}
+
+/* The snackbar - position it at the bottom and in the middle of the screen */
+#deleteTrip,
+#saveChenges {
+  visibility: hidden;
+  min-width: 250px;
+  margin-left: -125px;
+  background-color: #333;
+  color: #fff;
+  text-align: center;
+  border-radius: 2px;
+  padding: 16px;
+  position: fixed;
+  z-index: 1;
+  left: 50%;
+  bottom: 30px;
+}
+
+/* Show the snackbar when clicking on a button (class added with JavaScript) */
+#deleteTrip.show,
+#saveChenges.show {
+  visibility: visible;
+  /* Add animation: Take 0.5 seconds to fade in and out the snackbar.
+However, delay the fade out process for 2.5 seconds */
+  -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+  animation: fadein 0.5s, fadeout 0.5s 2.5s;
+}
+
+/* Animations to fade the snackbar in and out */
+@-webkit-keyframes fadein {
+  from {
+    bottom: 0;
+    opacity: 0;
+  }
+
+  to {
+    bottom: 30px;
+    opacity: 1;
+  }
+}
+
+@keyframes fadein {
+  from {
+    bottom: 0;
+    opacity: 0;
+  }
+
+  to {
+    bottom: 30px;
+    opacity: 1;
+  }
+}
+
+@-webkit-keyframes fadeout {
+  from {
+    bottom: 30px;
+    opacity: 1;
+  }
+
+  to {
+    bottom: 0;
+    opacity: 0;
+  }
+}
+
+@keyframes fadeout {
+  from {
+    bottom: 30px;
+    opacity: 1;
+  }
+
+  to {
+    bottom: 0;
+    opacity: 0;
+  }
+}
+</style>
