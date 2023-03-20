@@ -29,8 +29,13 @@ import { auth } from '../main'
 
 async function writeUserData(userId, email) {
   await setDoc(doc(db, `User: ${userId}`, "InfoAboutUser"), {
-  email: email,
-})}
+  "email": email,
+  "FirstName": "",
+  "LastName": "",
+  "PhoneNumber": "",
+  })
+  await setDoc(doc(db, `users`, userId), {})
+}
 const email = ref('')
 const password = ref('')
 const error = ref(null)
@@ -44,9 +49,10 @@ const handleSubmit = async () => {
       email: email.value,
       password: password.value
     })
+    localStorage.setItem('currentUser', JSON.stringify(auth.currentUser))
     router.push('/PersonalAccount')
-    const user = auth.currentUser;
-    writeUserData(user.uid, user.email)
+    writeUserData(auth.currentUser.uid, auth.currentUser.email)
+    
   }
   catch (err) {
     error.value = err.message

@@ -7,7 +7,8 @@ import {createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut} fro
 const store = createStore({
     state: {
         //The user state will initially be null. After login, this state will be updated
-        user: null
+        user: null,
+        userDel: false
     },
     mutations: {
         //Mutation to update the user state
@@ -17,6 +18,10 @@ const store = createStore({
             state.user = payload
             //Log out the user state
             console.log(state.user)
+        },
+        CurrentStateOfUser(state, val){
+            state.userDel = val
+            console.log(state.userDel)
         }
     },
     actions: {
@@ -42,6 +47,15 @@ const store = createStore({
             await signOut(auth)
 
             context.commit('setUser', null)
+            context.commit('CurrentStateOfUser', 'UserLogedOut')
+        },
+
+        UserDeleted(context){
+            context.commit('CurrentStateOfUser', 'UserDeleted')
+        },
+
+        defaultState(context){
+            context.commit('CurrentStateOfUser', 'defaultState')
         }
     }
 })

@@ -24,7 +24,7 @@
         <router-link to="/reserch" class="menu_link link">Поиск поездок</router-link> 
       </div>
       <div class="login">
-        <router-link to="/Navbar" class="logInButton link">
+        <router-link to="/Navbar" class="logInButton link" >
           <span class="spanLogin">
             <img src="./assets/login.png" alt="" id="log">
               Профиль

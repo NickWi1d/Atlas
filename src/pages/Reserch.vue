@@ -35,8 +35,9 @@
       </div>
     </div>
     <div class="resaults">
+      <div class="resaultsContent"></div>
     </div>
-    <div id="snackbar">Поездка успешно добавлена</div>
+    <div id="snackbar"></div>
   </div>
 </template>
 
@@ -44,20 +45,18 @@
 
 import { onMounted, ref, watchEffect } from "vue";
 import { db, auth } from '../main'
-import { doc, setDoc, collection, query, where, getDocs  } from "firebase/firestore";
+import { doc, setDoc, collection, query, where, getDocs } from "firebase/firestore";
 
-let resaults, currentDate = new Date(),  currentDay, currentMounth, res = {}
+let resaults, currentDate = new Date(), currentDay, currentMounth, res = {}
 String(currentDate.getDate()).length > 1 ? currentDay = currentDate.getDate() : currentDay = `0${currentDate.getDate()}`
 String(currentDate.getMonth()).length > 1 ? currentMounth = currentDate.getMonth() : currentMounth = `0${currentDate.getMonth() + 1}`
 let from = ref(), to = ref(), type = ref(), coastFrom = ref(), coastTo = ref(), date = ref(`${currentDate.getFullYear()}-${currentMounth}-${currentDay}`)
 
-
-
 onMounted(() => {
-  resaults = document.querySelector('.resaults')
+  resaults = document.querySelector('.resaultsContent')
   console.log(`${currentDate.getFullYear()}-${currentMounth}-${currentDay}`)
-})
 
+})
 
 function removeFiltr() {
   deleteItems()
@@ -68,6 +67,7 @@ function removeFiltr() {
   coastFrom.value = ''
   date.value = `${currentDate.getFullYear()}-${currentMounth}-${currentDay}`
 }
+
 function deleteItems() {
   let deleteElement = resaults.querySelectorAll('div');
   for (let i = 0; i < deleteElement.length; i++) {
@@ -78,6 +78,7 @@ function deleteItems() {
     deleteElementH1[i].remove();
   }
 }
+
 function search() {
   from.value == '' ? res.from = undefined : res.from = from.value
   to.value == '' ? res.to = undefined : res.to = to.value
@@ -89,9 +90,18 @@ function search() {
   filtr()
 }
 
+function notification(id, time, message) {
+  let x = document.getElementById(id);
+  x.innerText = message
+  x.className = "show";
+  setTimeout(function () { x.className = x.className.replace("show", ""); }, time);
+}
 
-async function AddInfoIntoUserData(userId, documentId, date, driver, from, price, time, to, trip, type) {
-  await setDoc(doc(db, `User: ${userId}`, documentId), {
+
+
+
+async function AddInfoIntoUserData(userId, documentId, date, driver, from, price, time, to, trip, type, unarmored, amountOfTrips) {
+  await setDoc(doc(db, userId, documentId), {
     date: date,
     driver: driver,
     from: from,
@@ -99,9 +109,61 @@ async function AddInfoIntoUserData(userId, documentId, date, driver, from, price
     time: time,
     to: to,
     trip: trip,
-    type: type
-  });
+    type: type,
+    unarmored: unarmored
+  })
+  let listOfUsers = []
+  let listOfTrips = []
+  const q = query(collection(db, "users"));
+  const querySnapshot = await getDocs(q);
+  querySnapshot.forEach((docum) => {
+    if (docum.id != 'admin') {
+      listOfUsers.push(`User: ${docum.id}`)
+    }
+  })
+  listOfUsers.push(`bus's trips`)
+  for (let val in listOfUsers) {
+    const specialQuery = query(collection(db, listOfUsers[val]));
+    const specialQuerySnapshot = await getDocs(specialQuery);
+    specialQuerySnapshot.forEach((docum) => {
+      if (docum.id == documentId) {
+        listOfTrips.push(listOfUsers[val])
+      }
+    })
+  }
+  console.log(`Список все пользователей: ${listOfUsers}`)
+  console.log(`Список все пользователей с документом '1': ${listOfTrips}`)
+  for (let value in listOfTrips) {
+    if (listOfTrips[value] != `bus's trips`) {
+      await setDoc(doc(db, listOfTrips[value], documentId), {
+        date: date,
+        driver: driver,
+        from: from,
+        price: price,
+        time: time,
+        to: to,
+        trip: trip,
+        type: type,
+        unarmored: unarmored - amountOfTrips,
+        person: amountOfTrips
+      })
+    } else {
+      await setDoc(doc(db, listOfTrips[value], documentId), {
+        date: date,
+        driver: driver,
+        from: from,
+        price: price,
+        time: time,
+        to: to,
+        trip: trip,
+        type: type,
+        unarmored: unarmored - amountOfTrips
+      })
+    }
+
+  }
 }
+
 async function filtr() {
   const queryConstraints = []
   for (let prop in res) {
@@ -115,82 +177,132 @@ async function filtr() {
   console.log(querySnapshot)
   deleteItems()
 
-  if (querySnapshot._snapshot.docChanges.length == 0){
+  if (querySnapshot._snapshot.docChanges.length == 0) {
     let h1 = document.createElement('h1')
     h1.innerHTML = "По данному запросу не ничего не найдено, пожалуйста измените запрос"
     resaults.append(h1)
   } else {
     querySnapshot.forEach((doc) => {
-      console.log(doc)
-      let div = document.createElement('div')
-      div.className = 'resOfSearch'
+      if (doc.data().unarmored > 0) {
+        console.log(doc)
+        let div = document.createElement('div')
+        div.className = 'resOfSearch'
 
-      let fromVrap = document.createElement('div')
-      fromVrap.className = 'fromVrap'
-      let from = document.createElement('h1')
-      from.innerHTML = `${doc.data().from}`
-      fromVrap.append(from)
-      div.append(fromVrap)
+        let fromVrap = document.createElement('div')
+        fromVrap.className = 'fromVrap'
+        let from = document.createElement('h1')
+        from.innerHTML = `${doc.data().from}`
+        fromVrap.append(from)
+        div.append(fromVrap)
 
 
-      let dashVrap = document.createElement('div')
-      dashVrap.className = 'dashVrap'
-      let dash = document.createElement('h1')
-      dash.innerHTML = `-`
-      dashVrap.append(dash)
-      div.append(dashVrap)
+        let dashVrap = document.createElement('div')
+        dashVrap.className = 'dashVrap'
+        let dash = document.createElement('h1')
+        dash.innerHTML = `-`
+        dashVrap.append(dash)
+        div.append(dashVrap)
 
-      let toVrap = document.createElement('div')
-      toVrap.className = 'toVrap'
-      let to = document.createElement('h1')
-      to.innerHTML = doc.data().to
-      toVrap.append(to)
-      div.append(toVrap)
+        let toVrap = document.createElement('div')
+        toVrap.className = 'toVrap'
+        let to = document.createElement('h1')
+        to.innerHTML = doc.data().to
+        toVrap.append(to)
+        div.append(toVrap)
 
-      let timeVrap = document.createElement('div')
-      timeVrap.className = 'timeVrap'
-      let time = document.createElement('h1')
-      time.innerHTML = doc.data().time
-      timeVrap.append(time)
-      div.append(timeVrap)
+        let timeVrap = document.createElement('div')
+        timeVrap.className = 'timeVrap'
+        let time = document.createElement('h1')
+        time.innerHTML = doc.data().time
+        timeVrap.append(time)
+        div.append(timeVrap)
 
-      let dateVrap = document.createElement('div')
-      dateVrap.className = 'dateVrap'
-      let date = document.createElement('h1')
-      date.innerHTML = doc.data().date
-      dateVrap.append(date)
-      div.append(dateVrap)
+        let dateVrap = document.createElement('div')
+        dateVrap.className = 'dateVrap'
+        let date = document.createElement('h1')
+        date.innerHTML = doc.data().date
+        dateVrap.append(date)
+        div.append(dateVrap)
 
-      let priceVrap = document.createElement('div')
-      priceVrap.className = 'priceVrap'
-      let price = document.createElement('h1')
-      price.innerHTML = `${doc.data().price}$`
-      priceVrap.append(price)
-      div.append(priceVrap)
+        let priceVrap = document.createElement('div')
+        priceVrap.className = 'priceVrap'
+        let price = document.createElement('h1')
+        price.innerHTML = `${doc.data().price}$`
+        priceVrap.append(price)
+        div.append(priceVrap)
 
-      let orderVrap = document.createElement('div')
-      orderVrap.className = 'orderVrap'
-      let order = document.createElement('input')
-      order.className = 'order'
-      order.type = 'button'
-      order.value = 'Добавить'
-      order.onclick = function () {
-        const user = auth.currentUser;
-        AddInfoIntoUserData(user.uid, doc.id, doc.data().date, doc.data().driver, doc.data().from, doc.data().price, doc.data().time, doc.data().to, doc.data().trip, doc.data().type)
-        // Get the snackbar DIV
-        var x = document.getElementById("snackbar");
+        let unarmoredVrap = document.createElement('div')
+        unarmoredVrap.className = 'unarmoredVrap'
+        let unarmored = document.createElement('h1')
+        unarmored.innerHTML = `Мест свободно: ${doc.data().unarmored}`
+        unarmoredVrap.append(unarmored)
+        div.append(unarmoredVrap)
 
-        // Add the "show" class to DIV
-        x.className = "show";
+        let orderVrap = document.createElement('div')
+        orderVrap.className = 'orderVrap'
+        let order = document.createElement('input')
+        order.className = 'order'
+        order.type = 'button'
+        order.value = 'Добавить'
+        order.onclick = function () {
+          if (Number(counter.value) > 0 && Number(counter.value) <= doc.data().unarmored && doc.data().unarmored > 0) {
+            const user = auth.currentUser;
+            AddInfoIntoUserData(`User: ${user.uid}`, doc.id, doc.data().date, doc.data().driver, doc.data().from, doc.data().price, doc.data().time, doc.data().to, doc.data().trip, doc.data().type, doc.data().unarmored, Number(counter.value))
+            notification('snackbar', 3000, 'Поездка успешно добавлена')
+            //потом заменить на отслеживание изменения даных в фаербасе
+            setTimeout(() => {
+              deleteItems()
+              search()
+            }, 1000);
+          } else {
+            notification('snackbar', 3000, 'Нельзя добавить такое кол-во поездок')
+          }
+        }
+        orderVrap.append(order)
+        div.append(orderVrap)
 
-        // After 3 seconds, remove the show class from DIV
-        setTimeout(function () { x.className = x.className.replace("show", ""); }, 3000);
+        let counterVrap = document.createElement('div')
+        counterVrap.className = 'counterVrap'
+
+        let decreaseCount = document.createElement('input')
+        decreaseCount.className = 'decreaseCount'
+        decreaseCount.type = 'button'
+        decreaseCount.value = '-'
+        decreaseCount.onclick = function () {
+          if (Number(counter.value) > 1) {
+            counter.value = Number(counter.value) - 1
+          } else {
+            notification('snackbar', 3000, 'Минимальное кол-во поездок для покупки: 1')
+          }
+        }
+        counterVrap.append(decreaseCount)
+
+        let counter = document.createElement('input')
+        counter.className = 'counter'
+        counter.type = 'number'
+        counter.value = 1
+        counterVrap.append(counter)
+
+        let increaseCount = document.createElement('input')
+        increaseCount.className = 'increaseCount'
+        increaseCount.type = 'button'
+        increaseCount.value = '+'
+        increaseCount.onclick = function () {
+          if (Number(counter.value) < doc.data().unarmored) {
+            counter.value = Number(counter.value) + 1
+          } else {
+            notification('snackbar', 3000, `Максимальное кол-во поездок для покупки: ${doc.data().unarmored}`)
+          }
+        }
+        counterVrap.append(increaseCount)
+
+        div.append(counterVrap)
+
+
+        resaults.append(div)
       }
-      orderVrap.append(order)
-      div.append(orderVrap)
-
-      resaults.append(div)
     })
+    resaults.height = `${querySnapshot.length * 140}px`
   }
 }
 
@@ -201,9 +313,7 @@ watchEffect(
 
 </script>
 
-<style> 
-
-.search {
+<style> .search {
    width: 100%;
    height: 90%;
    display: flex;
@@ -220,7 +330,11 @@ watchEffect(
 
  .resaults {
    height: 100%;
-   width: 85%;
+   width: 100%;
+ }
+
+ .resaultsContent {
+   overflow-y: scroll;
  }
 
  .bigInput {
@@ -290,7 +404,7 @@ watchEffect(
  }
 
  .resOfSearch {
-   width: 90%;
+   width: 95%;
    height: 100px;
    display: flex;
    justify-content: space-around;
@@ -315,10 +429,12 @@ watchEffect(
    background-color: #0d3ca3;
  }
 
- .fromVrap,
- .toVrap,
  .dateVrap {
-   width: 18%;
+   width: 15%;
+ }
+
+ .unarmoredVrap {
+   width: 25%;
  }
 
  .dashVrap {
@@ -326,8 +442,63 @@ watchEffect(
  }
 
  .timeVrap,
- .priceVrap {
+ .priceVrap,
+ .fromVrap,
+ .toVrap {
+   width: 12%;
+ }
+
+ /* .fromVrap{
+  margin-left: 1px;
+ } */
+
+ .counterVrap {
    width: 15%;
+   height: 100%;
+   display: flex;
+   align-items: center;
+   justify-content: space-around;
+   margin-right: 1%;
+ }
+
+ .counter {
+   width: 30%;
+   border: 1px solid;
+   height: 40%;
+   font-size: 200%;
+   color: #2c3e50;
+   font-family: Avenir, Helvetica, Arial, sans-serif;
+   font-weight: bold;
+   border-radius: 4px;
+   outline: none;
+ }
+
+ .decreaseCount {
+   width: 20%;
+   border: 1px solid;
+   height: 40%;
+   font-size: 200%;
+   color: #2c3e50;
+   font-family: Avenir, Helvetica, Arial, sans-serif;
+   font-weight: bold;
+   border-radius: 4px;
+ }
+
+ .increaseCount {
+   width: 20%;
+   border: 1px solid;
+   height: 40%;
+   font-size: 200%;
+   color: #2c3e50;
+   font-family: Avenir, Helvetica, Arial, sans-serif;
+   font-weight: bold;
+   border-radius: 4px;
+ }
+
+ .counter::-webkit-outer-spin-button,
+ .counter::-webkit-inner-spin-button {
+   -webkit-appearance: none;
+   margin: 0;
  }
 
  .orderVrap {
@@ -338,8 +509,6 @@ watchEffect(
    align-items: center;
  }
 
-
- /* The snackbar - position it at the bottom and in the middle of the screen */
  #snackbar {
    visibility: hidden;
    min-width: 250px;
@@ -355,16 +524,12 @@ watchEffect(
    bottom: 30px;
  }
 
- /* Show the snackbar when clicking on a button (class added with JavaScript) */
  #snackbar.show {
    visibility: visible;
-   /* Add animation: Take 0.5 seconds to fade in and out the snackbar.
-However, delay the fade out process for 2.5 seconds */
    -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
    animation: fadein 0.5s, fadeout 0.5s 2.5s;
  }
 
- /* Animations to fade the snackbar in and out */
  @-webkit-keyframes fadein {
    from {
      bottom: 0;
@@ -411,5 +576,4 @@ However, delay the fade out process for 2.5 seconds */
      bottom: 0;
      opacity: 0;
    }
- }
- </style>
+ }</style>

@@ -5,39 +5,45 @@
       <button class="tablink" @click="openPage('myTrips')">Мои поездки</button>
       <button class="tablink" @click="openPage('settings')">Настройки</button>
       <button class="tablink" @click="handleSubmit">Выйти</button>
+      <!-- <button class="tablink" @click="addTrips">Добавить поездок</button> -->
     </div>
     <div class="content">
       <div id="PersonalInfo" class="tabcontent">
-        <form action="action_page.php" @submit.prevent="saveChenges(user.uid, user.email, FullInfoAboutUser.FirstName, FullInfoAboutUser.LastName, FullInfoAboutUser.PhoneNumber)">
+        <form action="action_page.php"
+          @submit.prevent="saveChenges(FullInfoAboutUser.FirstName, FullInfoAboutUser.LastName, FullInfoAboutUser.PhoneNumber)">
 
           <label for="fname">Email</label>
-          <input type="text" id="fname" name="firstname" placeholder="Your email.." :value="user.email" readonly
-            class="personalInfo">
+          <input type="text" id="fname" name="firstname" placeholder="Your email.." :value="FullInfoAboutUser.email"
+            readonly class="personalInfo">
 
           <label for="fname">Имя</label>
-          <input type="text" id="fname" name="lastname" placeholder="Your first name.." v-model="FullInfoAboutUser.FirstName" class="personalInfo">
+          <input type="text" id="fname" name="lastname" placeholder="Your first name.."
+            v-model="FullInfoAboutUser.FirstName" class="personalInfo">
 
           <label for="lname">Фамилия</label>
-          <input type="text" id="lname" name="lastname" placeholder="Your last name.."  v-model="FullInfoAboutUser.LastName" class="personalInfo">
+          <input type="text" id="lname" name="lastname" placeholder="Your last name.."
+            v-model="FullInfoAboutUser.LastName" class="personalInfo">
 
           <label for="PhoneNumber">Номер телефона</label>
-          <input type="text" id="lname" name="PhoneNumber" placeholder="Your phone number.."  v-model="FullInfoAboutUser.PhoneNumber" class="personalInfo">
+          <input type="text" id="lname" name="PhoneNumber" placeholder="Your phone number.."
+            v-model="FullInfoAboutUser.PhoneNumber" class="personalInfo">
 
           <input type="submit" value="Сохранить">
 
         </form>
       </div>
       <div id="myTrips" class="tabcontent">
+        <div class="myTripsContent"></div>
       </div>
 
       <div id="settings" class="tabcontent">
         <div class="wrpDelAcc">
           <p>Вы можете удалить аккаунт без вожможности восстановления, все данные будут утеряны</p>
-          <input type="button" value="Удалить аккаунт" class="delAcc" @click="deleteUser(ids)">
+          <input type="button" value="Удалить аккаунт" class="delAcc" @click="deleteUser()">
         </div>
       </div>
     </div>
-    <div id="deleteTrip">Поездка успешно удалена</div>
+    <div id="snackbar">Поездка успешно удалена</div>
     <div id="saveChenges">Успешно сохранено</div>
   </div>
 </template>
@@ -52,85 +58,245 @@ import { collection, query, getDocs, doc, deleteDoc, setDoc } from 'firebase/fir
 let myTrips, ids = []
 let FullInfoAboutUser = ref({})
 
-const user = auth.currentUser;
 const error = ref(null)
 const store = useStore()
 const router = useRouter()
 
 onMounted(async () => {
   document.getElementById("defaultOpen").click()
-  myTrips = document.querySelector('#myTrips')
+  myTrips = document.querySelector('.myTripsContent')
   filtr()
   await getFullInfoAboutUser()
-  console.log(FullInfoAboutUser)
-
 })
-// Не работает((
-  async function getFullInfoAboutUser(){
-  const q = query(collection(db, `User: ${user.uid}`));
+// async function addTrips() {
+
+//   await setDoc(doc(db, "bus's trips", '5'), {
+//     date: "2023-06-10",
+//     driver: "Андрей",
+//     from: "Одесса",
+//     price: 120,
+//     time: "09:45",
+//     to: "Харьков",
+//     trip: 5,
+//     type: "Средний",
+//     unarmored: 25
+//   })
+
+//   await setDoc(doc(db, "bus's trips", '6'), {
+//     date: "2023-06-15",
+//     driver: "Дмитрий",
+//     from: "Владивосток",
+//     price: 800,
+//     time: "22:00",
+//     to: "Москва",
+//     trip: 6,
+//     type: "Большой",
+//     unarmored: 50
+//   })
+
+//   await setDoc(doc(db, "bus's trips", '7'), {
+//     date: "2023-07-01",
+//     driver: "Антон",
+//     from: "Санкт-Петербург",
+//     price: 180,
+//     time: "15:20",
+//     to: "Казань",
+//     trip: 7,
+//     type: "Средний",
+//     unarmored: 25
+//   })
+
+//   await setDoc(doc(db, "bus's trips", '8'), {
+//     date: "2023-07-10",
+//     driver: "Игорь",
+//     from: "Краснодар",
+//     price: 300,
+//     time: "11:10",
+//     to: "Сочи",
+//     trip: 8,
+//     type: "Средний",
+//     unarmored: 25
+//   })
+
+//   await setDoc(doc(db, "bus's trips", '9'), {
+//     date: "2023-08-01",
+//     driver: "Максим",
+//     from: "Москва",
+//     price: 150,
+//     time: "07:30",
+//     to: "Тверь",
+//     trip: 9,
+//     type: "Маленький",
+//     unarmored: 10
+//   })
+
+//   await setDoc(doc(db, "bus's trips", '10'), {
+//     date: "2023-08-12",
+//     driver: "Сергей",
+//     from: "Ростов-на-Дону",
+//     price: 220,
+//     time: "08:15",
+//     to: "Волгоград",
+//     trip: 10,
+//     type: "Средний",
+//     unarmored: 25
+//   })
+
+//   await setDoc(doc(db, "bus's trips", '11'), {
+//     date: "2023-08-25",
+//     driver: "Виктор",
+//     from: "Екатеринбург",
+//     price: 450,
+//     time: "19:00",
+//     to: "Казань",
+//     trip: 11,
+//     type: "Большой",
+//     unarmored: 50
+//   })
+// }
+async function getFullInfoAboutUser() {
+  const q = query(collection(db, `User: ${JSON.parse(localStorage.getItem('currentUser')).uid}`));
   const querySnapshot = await getDocs(q);
   querySnapshot.forEach((doc) => {
     if (doc.id == 'InfoAboutUser') {
       FullInfoAboutUser.value.FirstName = doc.data().FirstName
       FullInfoAboutUser.value.LastName = doc.data().LastName
       FullInfoAboutUser.value.PhoneNumber = doc.data().PhoneNumber
+      FullInfoAboutUser.value.email = doc.data().email
     }
 
   })
-  console.log(FullInfoAboutUser)
 }
 
-async function deleteTripFromPersonalAccount(collection, document) {
-  await deleteDoc(doc(db, `User: ${collection}`, document));
+async function deleteTripFromPersonalAccount(coll, documentID, docum, amountOfTrips) {
+  await deleteDoc(doc(db, `User: ${coll}`, documentID));
+  let listOfUsers = []
+  let listOfTrips = []
+  const q = query(collection(db, "users"));
+  const querySnapshot = await getDocs(q);
+  querySnapshot.forEach((docum) => {
+    if (docum.id != 'admin') {
+      listOfUsers.push(`User: ${docum.id}`)
+    }
+  })
+  listOfUsers.push(`bus's trips`)
+  for (let val in listOfUsers) {
+    if (listOfUsers[val] != `User: ${coll}`) {
+      const specialQuery = query(collection(db, listOfUsers[val]));
+      const specialQuerySnapshot = await getDocs(specialQuery);
+      specialQuerySnapshot.forEach((docum) => {
+        if (docum.id == documentID) {
+          listOfTrips.push(listOfUsers[val])
+        }
+      })
+    }
+  }
+  for (let value in listOfTrips) {
+    await setDoc(doc(db, listOfTrips[value], docum.id), {
+      date: docum.data().date,
+      driver: docum.data().driver,
+      from: docum.data().from,
+      price: docum.data().price,
+      time: docum.data().time,
+      to: docum.data().to,
+      trip: docum.data().trip,
+      type: docum.data().type,
+      unarmored: docum.data().unarmored + amountOfTrips
+    })
+  }
 }
 
-
-
-
-async function saveChenges(userId, email, Fname, Lname, PhoneNumber) {
-  await setDoc(doc(db, `User: ${userId}`, "InfoAboutUser"), {
-    "email": email,
+async function saveChenges(Fname, Lname, PhoneNumber) {
+  await setDoc(doc(db, `User: ${JSON.parse(localStorage.getItem('currentUser')).uid}`, "InfoAboutUser"), {
+    "email": JSON.parse(localStorage.getItem('currentUser')).email,
     "FirstName": Fname,
     "LastName": Lname,
     "PhoneNumber": PhoneNumber,
   })
-  // Get the snackbar DIV
-  var x = document.getElementById("saveChenges");
-
-  // Add the "show" class to DIV
-  x.className = "show";
-
-  // After 3 seconds, remove the show class from DIV
-  setTimeout(function () { x.className = x.className.replace("show", ""); }, 3000);
+  notification('saveChenges', 3000, 'Успешно сохранено')
 }
 async function getCollection() {
   ids = []
-  const querySnapshot = await getDocs(collection(db, `User: ${user.uid}`));
+  const querySnapshot = await getDocs(collection(db, `User: ${JSON.parse(localStorage.getItem('currentUser')).uid}`));
   querySnapshot.forEach((doc) => {
     // doc.data() is never undefined for query doc snapshots
-    console.log(doc.id, " => ", doc.data());
-    ids.push(doc.id)
+    console.log(doc.data());
+    ids.push(doc)
   })
   console.log(ids)
 }
 async function delDosFromCollection(arr) {
   for (let val in arr) {
-    await deleteDoc(doc(db, `User: ${user.uid}`, arr[val]));
+    await deleteDoc(doc(db, `User: ${JSON.parse(localStorage.getItem('currentUser')).uid}`, arr[val].id));
   }
 }
 async function deleteUser() {
   await getCollection()
   await delDosFromCollection(ids)
-  user.delete().then(function () {
+  for (let key in ids) {
+    if (ids[key].id != 'InfoAboutUser') {
+      console.log(ids[key].id)
+      console.log(ids[key])
+      console.log(ids[key].data())
+      let listOfUsers = []
+      let listOfTrips = []
+      const q = query(collection(db, "users"));
+      const querySnapshot = await getDocs(q);
+      querySnapshot.forEach((docum) => {
+        if (docum.id != 'admin') {
+          listOfUsers.push(`User: ${docum.id}`)
+        }
+      })
+      listOfUsers.push(`bus's trips`)
+      for (let val in listOfUsers) {
+        if (listOfUsers[val] != `User: ${JSON.parse(localStorage.getItem('currentUser')).uid}`) {
+          const specialQuery = query(collection(db, listOfUsers[val]));
+          const specialQuerySnapshot = await getDocs(specialQuery);
+          specialQuerySnapshot.forEach((docum) => {
+            if (docum.id == ids[key].id) {
+              listOfTrips.push(listOfUsers[val])
+            }
+          })
+        }
+        console.log(listOfUsers[val])
+      }
+      console.log(listOfTrips)
+      for (let value in listOfTrips) {
+        console.log(Number(ids[key].data().unarmored) + 1)
+        await setDoc(doc(db, listOfTrips[value], ids[key].id), {
+          date: ids[key].data().date,
+          driver: ids[key].data().driver,
+          from: ids[key].data().from,
+          price: ids[key].data().price,
+          time: ids[key].data().time,
+          to: ids[key].data().to,
+          trip: ids[key].data().trip,
+          type: ids[key].data().type,
+          unarmored: Number(ids[key].data().unarmored) + Number(ids[key].data().person)
+        })
+
+      }
+    }
+  }
+  await deleteDoc(doc(db, `users`, JSON.parse(localStorage.getItem('currentUser')).uid));
+  auth.currentUser.delete().then(function () {
+    store.dispatch('UserDeleted')
     console.log('пользователь удален')
   }).catch(function (error) {
     console.log(`Не удалился по причине: ${error.message}`)
   });
-  handleSubmit()
+  router.push('/Login')
+  localStorage.removeItem('currentUser')
 
 }
+function notification(id, time, message) {
+  let x = document.getElementById(id);
+  x.innerText = message
+  x.className = "show";
+  setTimeout(function () { x.className = x.className.replace("show", ""); }, time);
+}
 async function filtr() {
-  const q = query(collection(db, `User: ${user.uid}`));
+  const q = query(collection(db, `User: ${JSON.parse(localStorage.getItem('currentUser')).uid}`));
   const querySnapshot = await getDocs(q);
   // deleteItems()
   querySnapshot.forEach((doc) => {
@@ -140,6 +306,14 @@ async function filtr() {
 
       let wrapForDiv = document.createElement('div')
       wrapForDiv.className = 'wrapForDivPA'
+
+      let wraper = document.createElement('div')
+      wraper.className = 'wraperVrap'
+      let wraperImg = document.createElement('img')
+      wraperImg.className = 'wraper'
+      wraperImg.src = 'https://cdn-icons-png.flaticon.com/512/656/656777.png'
+      wraper.append(wraperImg)
+      wrapForDiv.append(wraper)
 
       let fromVrap = document.createElement('div')
       fromVrap.className = 'fromVrapPA'
@@ -184,6 +358,13 @@ async function filtr() {
       priceVrap.append(price)
       wrapForDiv.append(priceVrap)
 
+      let unarmoredVrap = document.createElement('div')
+      unarmoredVrap.className = 'unarmoredVrapPA'
+      let unarmored = document.createElement('h1')
+      unarmored.innerHTML = `Кол-во мест: ${(doc.data().type == 'Большой' ? 50 : 25) - doc.data().unarmored}`
+      unarmoredVrap.append(unarmored)
+      wrapForDiv.append(unarmoredVrap)
+
       let orderVrap = document.createElement('div')
       orderVrap.className = 'orderVrapPA'
       let order = document.createElement('input')
@@ -192,60 +373,67 @@ async function filtr() {
       order.value = 'Удалить'
       order.onclick = function () {
         div.remove()
-        deleteTripFromPersonalAccount(user.uid, doc.id)
-        // Get the snackbar DIV
-        var x = document.getElementById("deleteTrip");
-
-        // Add the "show" class to DIV
-        x.className = "show";
-
-        // After 3 seconds, remove the show class from DIV
-        setTimeout(function () { x.className = x.className.replace("show", ""); }, 3000);
+        deleteTripFromPersonalAccount(JSON.parse(localStorage.getItem('currentUser')).uid, doc.id, doc, (doc.data().type == 'Большой' ? 50 : 25) - doc.data().unarmored)
+        notification('snackbar', 3000, 'Поездка успешно удалена')
       }
       orderVrap.append(order)
       wrapForDiv.append(orderVrap)
 
       div.append(wrapForDiv)
 
-      div.onclick = function () {
-       if(div.querySelector('.aditionInfoPA') == null){
-        wrapForDiv.style.height = '50%'
-        div.style.height = "200px"
+      wraper.onclick = function () {
 
-        let aditionInfo = document.createElement('div')
-        aditionInfo.className = 'aditionInfoPA'
+        if (div.querySelector('.aditionInfoPA') == null) {
+          myTrips.height = `${myTrips.height + 140}px`
+          wraper.style.transform = 'rotate(-180deg)'
+          wrapForDiv.style.height = '50%'
+          div.style.height = "200px"
 
-        let Bus = document.createElement('div')
-        Bus.className = 'busVrapPA'
-        let typeOfBus = document.createElement('h1')
-        typeOfBus.innerHTML = `Тип автобуса: ${doc.data().type}`
-        Bus.append(typeOfBus)
-        aditionInfo.append(Bus)
+          let aditionInfo = document.createElement('div')
+          aditionInfo.className = 'aditionInfoPA'
+
+          let NumberOfTripVrap = document.createElement('div')
+          NumberOfTripVrap.className = 'NumverOfTripVrapPA'
+          let NumberOfTrip = document.createElement('h1')
+          NumberOfTrip.innerHTML = `Номер рейса: ${doc.data().trip}`
+          NumberOfTripVrap.append(NumberOfTrip)
+          aditionInfo.append(NumberOfTripVrap)
+
+          let Bus = document.createElement('div')
+          Bus.className = 'busVrapPA'
+          let typeOfBus = document.createElement('h1')
+          typeOfBus.innerHTML = `Тип автобуса: ${doc.data().type}`
+          Bus.append(typeOfBus)
+          aditionInfo.append(Bus)
 
 
-        let driverVrap = document.createElement('div')
-        driverVrap.className = 'driverVrapPA'
-        let driver = document.createElement('h1')
-        driver.innerHTML = `Водитель: ${doc.data().driver}`
-        driverVrap.append(driver)
-        aditionInfo.append(driverVrap)
+          let driverVrap = document.createElement('div')
+          driverVrap.className = 'driverVrapPA'
+          let driver = document.createElement('h1')
+          driver.innerHTML = `Водитель: ${doc.data().driver}`
+          driverVrap.append(driver)
+          aditionInfo.append(driverVrap)
 
-        div.append(aditionInfo)
-       }else{
-        wrapForDiv.style.height = '100%'
-        div.style.height = "100px"
-        div.querySelector('.aditionInfoPA').remove()
-       }
+          div.append(aditionInfo)
+        } else {
+          myTrips.height = `${myTrips.height - 140}px`
+          wraper.style.transform = 'rotate(0deg)';
+          wrapForDiv.style.height = '100%'
+          div.style.height = "100px"
+          div.querySelector('.aditionInfoPA').remove()
+        }
       }
       myTrips.append(div)
     }
-  });
+  })
+  myTrips.height = `${querySnapshot.length * 140}px`
 }
 
 
 const handleSubmit = async () => {
   try {
     await store.dispatch('logout')
+    localStorage.removeItem('currentUser')
     router.push('/Login')
   }
   catch (err) {
@@ -261,10 +449,10 @@ function openPage(pageName) {
   document.getElementById(pageName).style.display = "";
 }
 
+
 </script>
 
 <style>
-
 * {
   margin: 0;
 }
@@ -298,6 +486,15 @@ html {
   padding-top: 5%;
   width: 80%;
   height: 100%;
+}
+
+#myTrips {
+  height: 100%;
+}
+
+.myTripsContent {
+  overflow-y: scroll;
+  width: 90%;
 }
 
 /* Style tab links */
@@ -355,23 +552,48 @@ html {
   font-size: large;
 }
 
-.fromVrapPA,
-.toVrapPA,
+
 .dateVrapPA {
-  width: 18%;
+  width: 15%;
 }
 
-.busVrapPA, .driverVrapPA{
-  width: 50%;
-  margin-left: 3%;
+.unarmoredVrapPA {
+  width: 25%;
 }
+
+.busVrapPA,
+.driverVrapPA {
+  width: 35%;
+
+}
+
+.wraperVrap {
+  margin-left: 1%;
+  width: 4%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wraper {
+  width: 80%;
+  height: 40%;
+}
+
+.NumverOfTripVrapPA {
+  width: 25%;
+}
+
 .dashVrapPA {
   width: 2%;
 }
 
+.fromVrapPA,
+.toVrapPA,
 .timeVrapPA,
 .priceVrapPA {
-  width: 15%;
+  width: 12%;
 }
 
 .orderVrapPA {
@@ -403,11 +625,18 @@ html {
   height: 100%;
 }
 
-.aditionInfoPA{
+.resOfSearchPA:hover {
+  box-shadow: 2px 4px 20px rgb(8 78 104 / 12%), 10px 10px 10px rgb(8 78 104 / 18%);
+}
+
+.aditionInfoPA {
   display: flex;
-  justify-content: space-around;
-  width: 70%;
+  justify-content: flex-start;
+  width: 90%;
+  padding-top: 1%;
   height: 50%;
+  margin-right: 10%;
+  margin-left: 4.5%;
 }
 
 input[type=text],
@@ -553,5 +782,4 @@ However, delay the fade out process for 2.5 seconds */
     bottom: 0;
     opacity: 0;
   }
-}
-</style>
+}</style>
