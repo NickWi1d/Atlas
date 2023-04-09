@@ -21,7 +21,7 @@
       </div>
       <div class="menu">
         <router-link to="/" class="menu_link link">Домашняя страница</router-link>
-        <router-link to="/reserch" class="menu_link link">Поиск поездок</router-link> 
+        <router-link to="/reserch" class="menu_link link">Поиск рейсов</router-link> 
       </div>
       <div class="login">
         <router-link to="/Navbar" class="logInButton link" >
